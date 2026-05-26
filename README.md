@@ -4,6 +4,7 @@
 **Huelga Digital** is an interactive electronic literature piece combining user-generated protests and historical telegrams over a shifting visual landscape. It evokes the living memory of a 1934 agricultural strike in Estación Camarón, Nuevo León, to confront present-day narratives of violence, forced disappearance, and systemic amnesia in the Mexican northeast. Through the physical act of typing, the user dismantles contemporary tragedies to unearth a hidden history of youth, dignity, and resistance.
 
 *(Huelga Digital es una obra de literatura electrónica interactiva que combina protestas generadas por el usuario y telegramas históricos sobre un paisaje visual mutante. Evoca la memoria viva de la huelga agrícola de 1934 en Estación Camarón, Nuevo León, para confrontar las narrativas actuales de violencia, desaparición forzada y amnesia sistémica en el noreste mexicano. A través del acto físico de teclear, el usuario desmantela las tragedias contemporáneas para desenterrar una historia oculta de juventud, dignidad y resistencia).*
+
 👉 View the project: https://rubriar.github.io/huelgadigital/ 
 
 ## Artistic Statement
