@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estación Camarón: En busca de la Memoria</title>
+    <style>
+        :root {
+            --bg-oscuro: #0a0a0a;
+            --bg-telegrama: #eaddca; 
+            --rojo-resistencia: #b71c1c; 
+            --texto-gris: #b3b3b3;
+            --borde-pixel: 1px solid #222;
+            --dorado-historia: #e5c158;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-oscuro);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            transition: cursor 0.3s ease;
+        }
+
+        /* Estructura de 3 Columnas */
+        .columna {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+
+        #col-izquierda {
+            width: 28%;
+            border-right: var(--borde-pixel);
+            background-color: #111;
+        }
+
+        #col-central {
+            width: 44%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000;
+            position: relative;
+            padding: 20px;
+        }
+
+        #col-derecha {
+            width: 28%;
+            border-left: var(--borde-pixel);
+            background-color: #111;
+        }
+
+        /* Lienzo Visual Central */
+        .contenedor-archivo {
+            width: 100%;
+            height: 35vh; 
+            border: var(--borde-pixel);
+            background-color: #1a1a1a; /* Color de respaldo si falla la imagen */
+            background-size: cover;
+            background-position: center;
+            transition: background-image 2s ease-in-out;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        /* Bloque inferior independiente para las noticias y hechos históricos */
+        .archivo-texto-centro {
+            width: 100%;
+            flex-grow: 1; 
+            overflow-y: auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding-right: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px; 
+        }
+
+        /* Estilos de las notas de prensa y hechos */
+        .nota-prensa {
+            color: var(--texto-gris);
+            font-size: 0.68rem; 
+            width: 100%;
+            padding: 6px 8px; 
+            border-left: 2px solid #555;
+            background: #111;
+            line-height: 1.3;
+            transition: all 0.4s ease;
+        }
+
+        .hecho-historico {
+            color: var(--dorado-historia);
+            font-size: 0.68rem;
+            width: 100%;
+            padding: 6px 8px;
+            border-left: 2px solid var(--dorado-historia);
+            background: #161613;
+            line-height: 1.3;
+            animation: surgir 0.5s ease;
+        }
+
+        /* Bloques de Contexto e Instrucciones */
+        .bloque-info {
+            background: #161616;
+            border: 1px solid #222;
+            padding: 15px;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        .bloque-info strong { color: #cd201f; }
+        .bloque-info.contexto strong { color: var(--dorado-historia); }
+
+        /* Burbujas de WhatsApp Rojo (Izquierda) */
+        .chat-stream {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg-resistencia {
+            background-color: var(--rojo-resistencia);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 12px 12px 0px 12px; 
+            font-size: 0.8rem;
+            width: auto;
+            max-width: 90%;
+            align-self: flex-end; 
+            font-weight: normal;
+            line-height: 1.3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            animation: surgir 0.3s ease;
+        }
+
+        /* Telegramas Vintage y Delgados (Derecha) */
+        .telegrama-mini {
+            background-color: var(--bg-telegrama);
+            color: #1a1a1a;
+            padding: 8px 12px;
+            border: 1px solid #8b7d6b;
+            margin-bottom: 8px;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 0.7rem;
+            line-height: 1.3;
+            font-family: 'Courier New', Courier, monospace;
+            animation: surgir 0.4s ease forwards;
+        }
+
+        .telegrama-mini::before {
+            content: "TELEGRAMA URGENTE // OCT-1934";
+            display: block;
+            font-size: 0.55rem;
+            color: #5c5142;
+            border-bottom: 1px dotted #8b7d6b;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .zona-input-global { width: 100%; flex-shrink: 0; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+
+        input:focus { outline: none; border-color: #cd201f; }
+
+        .contador-global {
+            font-size: 0.72rem;
+            color: #555;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* Pantalla de Cierre */
+        #capa-final {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.98);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+            cursor: pointer;
+        }
+
+        .bloque-final { max-width: 650px; line-height: 1.6; }
+        .bloque-final h2 { font-size: 1.4rem; margin-bottom: 20px; color: #ff4d4d; }
+        .bloque-final p { font-size: 1.1rem; margin-bottom: 20px; color: #ccc; }
+
+        @keyframes surgir {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="col-izquierda" class="columna">
+        <h3>1. Tus Protestas</h3>
+        <div class="bloque-info">
+            <strong>MANIFIESTO DE LA HUELGA VIRTUAL:</strong><br>
+            Estación Camarón, en el norte de Nuevo León, hoy yace en ruinas, silenciosa ante el dolor que cruza nuestro México actual. Los caminos fronterizos, las carreteras del noreste y los pueblos pequeños sufren la huella de la violencia, el abandono y el constante peligro de quienes transitan o habitan estas tierras.<br><br>
+            Para confrontar este olvido, te invitamos a ser un participante activo: redacta <strong>10 frases de protesta</strong> (máx. 12 palabras) sobre la compleja situación que vive el país y sus fronteras. Cada respuesta desmantelará una estampa del presente doloroso para recuperar, línea por línea, la memoria histórica del lugar.
+        </div>
+        <div class="chat-stream" id="contenedorChat"></div>
+    </div>
+
+    <div id="col-central">
+        <h3 style="color:#ff4d4d; border:none; margin:0; text-align:center;">Estación Camarón: Huelga digital contra el olvido</h3>
+        
+        <div class="contenedor-archivo" id="lienzoCentral"></div>
+
+        <div class="archivo-texto-centro" id="bloqueTextoCentro">
+            <div class="nota-prensa" id="nota-0">Restos óseos localizados en predios de Anáhuac desatan la alerta de colectivos de búsqueda.</div>
+            <div class="nota-prensa" id="nota-1">El control silencioso somete la vida cotidiana en las comunidades ejidales del norte.</div>
+            <div class="nota-prensa" id="nota-2">Las rutas desérticas de Sabinas registran constantes reportes de desapariciones forzadas.</div>
+            <div class="nota-prensa" id="nota-3">Rastros de ropa y botellas vacías quedan abandonados cerca de las inmediaciones de la presa.</div>
+            <div class="nota-prensa" id="nota-4">Comunidades que alguna vez bulleron de vida fronteriza hoy lucen fachadas vacías y asfalto roto.</div>
+            <div class="nota-prensa" id="nota-5">Retenes improvisados y miradas vigilantes restringen el paso en los caminos vecinales del tren.</div>
+            <div class="nota-prensa" id="nota-6">Nadie habla en voz alta en las plazas públicas; el miedo es un habitante permanente del entorno.</div>
+            <div class="nota-prensa" id="nota-7">Familias enteras peregrinan ante oficinas gubernamentales exigiendo respuestas que nunca llegan.</div>
+            <div class="nota-prensa" id="nota-8">Cruzar esta franja de la frontera se ha convertido en un desafío a la suerte bajo cielos mudos.</div>
+            <div class="nota-prensa" id="nota-9">El polvo del olvido oficial sepulta las ruinas físicas y las memorias de la estación ferroviaria.</div>
+        </div>
+
+        <div class="zona-input-global">
+            <input type="text" id="entradaQueja" placeholder="Escribe tu reflexión o queja y presiona Enter..." autofocus>
+            <div class="contador-global" id="conteoFrases">Frases enviadas: 0 / 10</div>
+        </div>
+    </div>
+
+    <div id="col-derecha" class="columna">
+        <h3>2. El Archivo (1934)</h3>
+        <div class="bloque-info contexto">
+            <strong>CONTEXTO HISTÓRICO:</strong><br>
+            En 1934, Estación Camarón fue el epicentro de una masiva huelga agrícola de trabajadores del algodón. Un joven <strong>José Revueltas</strong> de 19 años viajó a caballo para apoyarla, cruzándose con los abuelos de Cristina Rivera Garza en un estallido de idealismo y juventud.
+        </div>
+        <div id="contenedorTelegramas"></div>
+    </div>
+
+    <div id="capa-final">
+        <div class="bloque-final">
+            <h2>LA COLUMNA DE LA MEMORIA</h2>
+            <p><strong>Has destruido el muro del silencio. Las ruinas han hablado.</strong></p>
+            <p>Estación Camarón ya no es solo un paraje de abandono; vuelve a ser el epicentro de la dignidad donde José Revueltas, Petra Peña y José María Rivera demostraron que la juventud no se rinde ante los tiempos oscuros.</p>
+            <p style="font-size:0.85rem; color:#e5c158; font-style:italic; border-left: 2px solid #b71c1c; padding-left:15px; text-align:left; margin-bottom: 30px; line-height: 1.4;">
+                "Este es un segundo en el que creo: José Revueltas se topa con los ojos de José María Rivera y Petra Peña sobre un campo de algodón en huelga." <br>— Cristina Rivera Garza (@EstacionCamaron)
+            </p>
+            <p style="font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 2px;">[ Haz clic en cualquier parte para reiniciar la huelga ]</p>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN DE LAS IMÁGENES
+        // Asegúrate de que las imágenes se llamen exactamente 'ruinas.png' y 'huelga.png' y estén dentro de la carpeta 'imagenes'
+        const IMAGEN_PRESENTE = "url('imagenes/ruinas.png')"; 
+        const IMAGEN_PASADO = "url('imagenes/huelga.png')"; 
+
+        // HECHOS HISTÓRICOS PUROS 
+        const hechosHistoricos = [
+            "En octubre de 1934, miles de jornaleros agrícolas detienen la pisca de algodón exigiendo contratos colectivos justos.",
+            "La movilización recibe el respaldo de las bases agraristas que buscaban hacer valer el reparto agrario en el norte.",
+            "Con solo 19 años, José Revueltas llega como delegado enviado para organizar las asambleas políticas de los huelguistas.",
+            "El campamento obrero junto a la vía se organiza como una comunidad autónoma que comparte alimentos y cobijo.",
+            "Petra Peña y José María Rivera coinciden en las brigadas destinadas a resguardar el perímetro de las carpas.",
+            "Los huelguistas resisten firmemente la intimidación de guardias armadas leales a los intereses terratenientes.",
+            "A la luz de las fogatas se leen y discuten manifiestos ideológicos redactados de puño y letra en papel periódico.",
+            "El cese de actividades paraliza la economía algodonera de la región, sentando un precedente sindical invaluable.",
+            "Entre la tensión de la huelga y la esperanza del movimiento florece el lazo definitivo entre Petra y José María.",
+            "Estación Camarón queda grabada en el archivo comunitario como un testimonio del poder organizativo de la juventud."
+        ];
+
+        // BANCO DE TELEGRAMAS RANDOM
+        const archivoTelegramas = [
+            "JOSE REVUELTAS AVANZA A CABALLO BUSCANDO UNA GRIETA EN EL SILENCIO STOP",
+            "DIECINUEVE ANOS DE EDAD Y EL MANIFIESTO EN ARREBATO DENTRO DEL PECHO STOP",
+            "EL POLVO DE SABINAS HIDALGO NO DETIENE LAS GANAS DE REVOLUCION STOP",
+            "LLEGAR A LA ESTACION CAMARON ES ENCONTRAR UN CUARTEL DE ILUSIONES STOP",
+            "NUESTRA JUVENTUD NO PIDE PERMISO PARA TRANSFORMAR LA TIERRA STOP",
+            "LA HUELGA AGRICOLA ES EL PRIMER GRITO DE LOS EXPLOTADOS DEL ALGODON STOP",
+            "MILES DE COMPANEROS UNIDOS BAJO EL SOL DEMUESTRAN QUE HAY ESPERANZA STOP",
+            "EL CAPITALISMO TIEMBLA CUANDO LA CLASE OBRERA SE LEVANTA EN LA FRONTERA STOP",
+            "AQUI LA TIERRA HUELE A JUSTICIA SOCIAL Y A SANGRE NUEVA STOP",
+            "NO VENIMOS A CONTEMPLAR LAS RUINAS SINO A CONSTRUIR EL FUTURO STOP",
+            "CADA KILO DE ALGODON LLEVA EL SUDOR DE UNA LUCHA LEGITIMA STOP",
+            "LA UTOPIA NO ES UN SUEÑO ES UNA ORDEN DE COMBATE ASIGNADA STOP",
+            "FRENTE A LOS FUSILES DE LA PATRONAL SE OPONE NUESTRA DIGNIDAD INSURGENTE STOP",
+            "LA HISTORIA NO SE ESCRIBE CON LAMENTOS SINO CON VOCES CLARAS STOP",
+            "ORGANIZAR LA RABIA ES EL DEBER MAS ALTO DE UN JOVEN REVOLUCIONARIO STOP",
+            "JOSE MARIA RIVERA MIRA EL HORIZONTE ROJO DE LA COSECHA STOP",
+            "PETRA PENA SOSTIENE LA BANDERA CON MANOS DE ALGODON Y ACERO STOP",
+            "EN MEDIO DE LAS CARPAS DE LA HUELGA NACE EL AMOR REBELDE STOP",
+            "DOS MIRADAS JOVENES SE CRUZAN BAJO EL CIELO DE COAHUILA Y NUEVO LEON STOP",
+            "LA PRIMERA VEZ QUE SE VIERON EL PAIS ENTERO PARECIO DETENERSE STOP",
+            "AMARSE EN TIEMPOS DE LUCHA ES EL ACTO MAS REVOLUCIONARIO STOP",
+            "JOSE MARIA JURA PROTEGER LOS SUENOS DE PETRA CONTRA EL GOBIERNO STOP",
+            "PETRA ENCUENTRA EN SUS OJOS EL COMBUSTIBLE PARA SEGUIR FIRME STOP",
+            "LA JUVENTUD EXIGE UN CAMBIO DONDE EL AMOR NO SEA CLANDESTINO STOP",
+            "NUESTROS HIJOS NACERAN EN UN PAIS LIBRE DE EXPLOTADORES STOP",
+            "UNIDOS EN EL SINDICATO Y UNIDOS EN LA PROMESA DE UNA VIDA JUNTOS STOP",
+            "LOS MIL HUELGUISTAS SON TESTIGOS DE UN ROMANCE QUE NO ENVEJECE STOP",
+            "LA RESISTENCIA TIENE EL ROSTRO JOVEN DE QUIENES SE ATREVEN A QUERER STOP",
+            "PETRA Y JOSE MARIA CONSTRUYEN UNA PATRIA PEQUENA ENTRE SUS MANOS STOP",
+            "MIENTRAS QUEDE UN INSTANTE DE JUVENTUD LA ESPERANZA NO TENDRA FIN STOP"
+        ];
+
+        const lienzoCentral = document.getElementById('lienzoCentral');
+        const bloqueTextoCentro = document.getElementById('bloqueTextoCentro');
+        const entradaQueja = document.getElementById('entradaQueja');
+        const contenedorChat = document.getElementById('contenedorChat');
+        const contenedorTelegramas = document.getElementById('contenedorTelegramas');
+        const conteoFrases = document.getElementById('conteoFrases');
+        const capaFinal = document.getElementById('capa-final');
+
+        let frasesEnviadas = 0;
+        
+        lienzoCentral.style.backgroundImage = IMAGEN_PRESENTE;
+
+        entradaQueja.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const texto = entradaQueja.value.trim();
+                const palabras = texto.split(/\s+/).filter(p => p.length > 0);
+
+                if (texto === "") return;
+                if (palabras.length > 12) {
+                    alert("Por favor, usa máximo 12 palabras.");
+                    return;
+                }
+
+                // 1. Burbuja estilo WhatsApp a la izquierda
+                const msg = document.createElement('div');
+                msg.className = 'msg-resistencia';
+                msg.textContent = texto;
+                contenedorChat.appendChild(msg);
+                contenedorChat.scrollTop = contenedorChat.scrollHeight;
+
+                // 2. Transición del texto ABAJO de la imagen
+                const notaABorrar = document.getElementById(`nota-${frasesEnviadas}`);
+                if (notaABorrar) {
+                    notaABorrar.className = 'hecho-historico';
+                    notaABorrar.innerHTML = hechosHistoricos[frasesEnviadas];
+                }
+                bloqueTextoCentro.scrollTop = bloqueTextoCentro.scrollHeight;
+
+                // 3. Telegrama aleatorio vintage a la derecha
+                const indiceRandom = Math.floor(Math.random() * archivoTelegramas.length);
+                const miniT = document.createElement('div');
+                miniT.className = 'telegrama-mini';
+                miniT.innerHTML = archivoTelegramas[indiceRandom];
+                contenedorTelegramas.appendChild(miniT);
+                contenedorTelegramas.scrollTop = contenedorTelegramas.scrollHeight;
+
+                frasesEnviadas++;
+                conteoFrases.textContent = `Frases enviadas: ${frasesEnviadas} / 10`;
+                entradaQueja.value = "";
+
+                // 4. Clímax al llegar a las 10 frases
+                if (frasesEnviadas === 10) {
+                    entradaQueja.style.display = 'none';
+                    
+                    // Cambia la imagen central limpiamente a la foto de 1934
+                    lienzoCentral.style.backgroundImage = IMAGEN_PASADO;
+                    
+                    // Cambia el cursor a pointer en todo el documento
+                    document.body.style.cursor = 'pointer';
+                    
+                    setTimeout(() => {
+                        document.addEventListener('click', desplegarCierre);
+                    }, 100);
+                }
+            }
+        });
+
+        function desplegarCierre() {
+            capaFinal.style.display = 'flex';
+            document.removeEventListener('click', desplegarCierre);
+            document.body.style.cursor = 'default';
+        }
+
+        capaFinal.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            location.reload();
+        });
+    </script>
+</body>
+</html>
